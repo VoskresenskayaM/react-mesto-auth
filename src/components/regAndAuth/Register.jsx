@@ -1,7 +1,7 @@
 import React from 'react'
 import Form from '../Form'
-import useForm from '../hooks/useForm'
-import HeaderNotReg from '../HeaderNotReg'
+import useForm from '../../hooks/useForm'
+
 function Register({ registerUser, handleOut }) {
 
     const { form, errors, handleChange } = useForm({
@@ -15,7 +15,7 @@ function Register({ registerUser, handleOut }) {
     }
 
     function regOut() {
-        handleOut('/signup')
+        handleOut('/sign-in')
     }
 
     const emailSpanClassName = `form__input-error  form__input-error_theme_dark  ${errors.email ?
@@ -26,9 +26,6 @@ function Register({ registerUser, handleOut }) {
     return (
 
         <div className='login'>
-            <HeaderNotReg
-                actionText='Вход'
-                handleOut={regOut} />
             <div className='login__form-container'>
                 <Form
                     title='Регистрация'

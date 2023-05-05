@@ -7,3 +7,4 @@ const InfoTooltip = ({ image, regText }) => {
     )
 }
 export default InfoTooltip
+

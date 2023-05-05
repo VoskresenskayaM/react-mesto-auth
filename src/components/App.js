@@ -1,4 +1,3 @@
-
 import Main from './Main';
 import Footer from './Footer';
 import ImagePopup from './ImagePopup'
@@ -15,9 +14,10 @@ import Register from './regAndAuth/Register';
 import Login from './regAndAuth/Login';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import ProtectedRouteElement from './regAndAuth/ProtectedRoute.jsx'
-import *as auth from './regAndAuth/auth'
+import *as auth from '../utils/AuthApi'
 import ErrorRegPopup from './regAndAuth/ErrorRegPopup'
 import SuccesRegPopup from './regAndAuth/SuccesRegPopup'
+import Header from './Header'
 
 function App() {
 
@@ -77,13 +77,10 @@ function App() {
         if (isErrorRegPopupOpen) setIsErrorRegPopupOpen(false)
     }
 
-    const [isLoadingDeleteCard, setIsLoadingDeleteCard] = useState(false)
-    const [isLoadingAddNewCard, setIsLoadingAddNewCard] = useState(false)
-    const [isLoadingUpdateUser, setIsLoadingUpdateUser] = useState(false)
-    const [isLoadingUpdateAvatar, setIsLoadingUpdateAvatar] = useState(false)
+    const [isLoading, setIsLoading] = useState(false)
 
     function handleDeleteCard() {
-        setIsLoadingDeleteCard(true)
+        setIsLoading(true)
         api.deleteCard(selectedCard._id)
             .then(() => {
                 setCards(cards => cards.filter(c => c._id !== selectedCard._id))
@@ -92,7 +89,7 @@ function App() {
             .catch((err) =>
                 console.log(err))
             .finally(() => {
-                setIsLoadingDeleteCard(false)
+                setIsLoading(false)
             })
     }
 
@@ -106,7 +103,7 @@ function App() {
     }
 
     function handleAddNewCard(card) {
-        setIsLoadingAddNewCard(true)
+        setIsLoading(true)
         api.addNewCard({ item: card })
             .then((newCard) => {
                 setCards([newCard, ...cards])
@@ -114,12 +111,12 @@ function App() {
             })
             .catch((err) => console.log(err))
             .finally(() => {
-                setIsLoadingAddNewCard(false)
+                setIsLoading(false)
             })
     }
 
     function handleUpdateUser(user) {
-        setIsLoadingUpdateUser(true)
+        setIsLoading(true)
         api.editUserInfo({ item: user })
             .then((newUser) => {
                 setCurrentUser(newUser)
@@ -129,12 +126,12 @@ function App() {
                 console.log(err)
             })
             .finally(() => {
-                setIsLoadingUpdateUser(true)
+                setIsLoading(true)
             })
     }
 
     function handleUpdateAvatar(userAvatarLink) {
-        setIsLoadingUpdateAvatar(true)
+        setIsLoading(true)
         api.editAvatar({ item: userAvatarLink })
             .then((newAvatar) => {
                 setCurrentUser(newAvatar)
@@ -144,13 +141,12 @@ function App() {
                 console.log(err)
             })
             .finally(() => {
-                setIsLoadingUpdateAvatar(false)
+                setIsLoading(false)
             })
     }
 
     /*регистрация, авторизация*/
     const [loggenIn, setLoggenIn] = useState(false);
-    const [isBurger, setIsBurger] = useState(true)
     const [currentUserEmail, setCurrentUserEmail] = useState('')
 
     const navigate = useNavigate();
@@ -160,10 +156,10 @@ function App() {
     }
 
     useEffect(() => {
-        tokenCheck();
+        checkToken();
     }, [])
 
-    function tokenCheck() {
+    function checkToken() {
         if (localStorage.getItem('token')) {
             const token = localStorage.getItem('token')
             auth.getContent(token)
@@ -175,18 +171,21 @@ function App() {
                         navigate('/', { replace: true })
                     }
                 })
+                .catch((err) => {
+                    console.log(err)
+                })
         }
     }
 
     /*регистрация пользователя*/
     function registerUser(email, password) {
         auth.register(email, password)
-            .then((res) => {
-                if (!res) {
-                    setIsErrorRegPopupOpen(true)
+            .then((data) => {
+                if (data) {
+                    setIsSuccesRegPopupOpen(true)
                 }
                 else {
-                    setIsSuccesRegPopupOpen(true)
+                    setIsErrorRegPopupOpen(true)
                 }
             })
             .catch((err) => {
@@ -200,12 +199,13 @@ function App() {
             return
         }
         auth.authorize(form.email, form.password)
-            .then((data) => {
-                if (data.token) {
+            .then((token) => {
+                if (token) {
                     handleLogin();
                     setCurrentUserEmail(form.email)
                     navigate('/', { replace: true })
                 }
+                else setIsErrorRegPopupOpen(true)
             })
             .catch((err) => {
                 console.log(err)
@@ -217,38 +217,21 @@ function App() {
         navigate(path, { replace: true })
     }
 
-    function handleBurgerButton() {
-        setIsBurger(!isBurger)
-    }
-
-    function handleUserOut() {
-        localStorage.removeItem('token')
-        handleOut('/sign-up')
-        handleLogin()
-        handleBurgerButton()
-    }
-
     return (
         <div className="App">
             <CurrentUserContext.Provider value={currentUser}>
                 <CurrentUserEmailContext.Provider value={currentUserEmail}>
                     <div className="page">
+                        <Header handleLogin={handleLogin} />
                         <Routes>
                             <Route path='*' element={loggenIn ? <Navigate to='/' replace /> :
-                                <Navigate to='/sign-up' replace />} />
-                            <Route path='/sign-up' element={<Login
-                                handleLogin={handleLogin}
-                                loggenIn={loggenIn}
-                                loginUser={loginUser}
-                                handleOut={handleOut}
-                                handleBurgerButton={handleBurgerButton} />} />
-                            <Route path="/sign-in" element={<Register
-                                loggenIn={loggenIn}
+                                <Navigate to='/sign-in' replace />} />
+                            <Route path='/sign-in' element={<Login
+                                loginUser={loginUser} />} />
+                            <Route path="/sign-up" element={<Register
                                 registerUser={registerUser}
-                                handleOut={handleOut}
-                                handleBurgerButton={handleBurgerButton} />} />
+                                handleOut={handleOut} />} />
                             <Route path="/" element={<ProtectedRouteElement element={Main}
-                                setCards={setCards}
                                 cards={cards}
                                 onEditProfile={handleEditProfileClick}
                                 onAddPlace={handleAddPlaceClick}
@@ -257,23 +240,20 @@ function App() {
                                 onCardDelete={handleDeleteCardClick}
                                 onCardLike={handleCardLike}
                                 loggenIn={loggenIn}
-                                handleLogin={handleLogin}
-                                handleUserOut={handleUserOut}
-                                handleBurgerButton={handleBurgerButton}
-                                isBurger={isBurger} />} />
+                                handleLogin={handleLogin} />} />
                         </Routes>
                         <Footer />
                         <EditProfilePopup
                             isOpen={isEditProfilePopupOpen}
                             onClose={closeAllPopups}
                             onUpdateUser={handleUpdateUser}
-                            isLoading={isLoadingUpdateUser}>
+                            isLoading={isLoading}>
                         </EditProfilePopup>
                         <AddPlacePopup
                             isOpen={isAddPlacePopupOpen}
                             onClose={closeAllPopups}
                             onAddNewCard={handleAddNewCard}
-                            isLoading={isLoadingAddNewCard}>
+                            isLoading={isLoading}>
                         </AddPlacePopup>
                         <ImagePopup
                             card={selectedCard}
@@ -283,13 +263,13 @@ function App() {
                             isOpen={isDeletePopupOpen}
                             onClose={setIsDeletePopupOpen}
                             onDeleteCard={handleDeleteCard}
-                            isLoading={isLoadingDeleteCard}>
+                            isLoading={isLoading}>
                         </DeleteCardPopup>
                         <EditAvatarPopup
                             isOpen={isEditAvatarPopupOpen}
                             onClose={closeAllPopups}
                             onUpdateAvatar={handleUpdateAvatar}
-                            isLoading={isLoadingUpdateAvatar}>
+                            isLoading={isLoading}>
                         </EditAvatarPopup>
                         <SuccesRegPopup
                             name='regSucces'

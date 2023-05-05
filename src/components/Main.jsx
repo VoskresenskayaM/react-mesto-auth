@@ -3,11 +3,9 @@ import editFotoProfile from '../images/editFotoProfile.svg'
 import Card from './Card'
 import { CurrentUserContext } from '../contexts/CurrentUserContext'
 import { useContext } from 'react'
-import HeaderReg from "./HeaderReg"
-
 
 function Main({ onEditAvatar, onEditProfile, onAddPlace, cards, onCardClick, onCardDelete,
-    onCardLike, loggenIn, handleBurgerButton, handleUserOut, isBurger }) {
+    onCardLike }) {
 
     const currentUser = useContext(CurrentUserContext);
 
@@ -21,18 +19,8 @@ function Main({ onEditAvatar, onEditProfile, onAddPlace, cards, onCardClick, onC
         </li>
     ))
 
-    function userOut() {
-        handleUserOut()
-    }
-
     return (
         <div className="main">
-            <HeaderReg
-                actionText='Выйти'
-                loggenIn={loggenIn}
-                handleOut={userOut}
-                handleBurgerButton={handleBurgerButton}
-                isBurger={isBurger} />
             <main className="page__content">
                 <section className="profile">
                     <div className="profile__image-block">

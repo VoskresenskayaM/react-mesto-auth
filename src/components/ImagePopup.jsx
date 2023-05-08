@@ -8,11 +8,8 @@ function ImagePopup({ isOpen, onClose, card }) {
         function handleEscClose(evt) {
             if (evt.key === 'Escape') onClose()
         }
-
-        if (isOpen) {
-            document.addEventListener('keydown', handleEscClose)
-            return () => document.removeEventListener('keydown', handleEscClose)
-        }
+        document.addEventListener('keydown', handleEscClose)
+        return () => document.removeEventListener('keydown', handleEscClose)
     }, [isOpen])
 
     return (

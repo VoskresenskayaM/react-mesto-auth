@@ -1,17 +1,14 @@
 import React from "react";
 import { useEffect } from "react";
 
-const Popup = ({ isOpen, onClose, name, themecontainer, Element}) => {
+const Popup = ({ isOpen, onClose, name, themecontainer, Element }) => {
 
     useEffect(() => {
         function handleEscClose(evt) {
             if (evt.key === 'Escape') onClose()
         }
-
-        if (isOpen) {
-            document.addEventListener('keydown', handleEscClose)
-            return () => document.removeEventListener('keydown', onClose)
-        }
+        document.addEventListener('keydown', handleEscClose)
+        return () => document.removeEventListener('keydown', onClose)
     }, [isOpen])
 
     const popupClass = `popup  popup_type_${name} ${isOpen ? 'popup_opened' : ''}`;
@@ -21,7 +18,7 @@ const Popup = ({ isOpen, onClose, name, themecontainer, Element}) => {
             <div className={containerClass} onClick={(e => e.stopPropagation())}>
                 <button className="popup__close-button" type="button" aria-label="закрыть"
                     onClick={onClose}></button>
-             {Element}
+                {Element}
             </div>
         </div >
     )

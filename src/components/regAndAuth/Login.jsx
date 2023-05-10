@@ -34,7 +34,7 @@ function Login({ loginUser }) {
                         value={form.email} onChange={handleChange} />
                     <span className={emailSpanClassName}>{errors.email}</span>
                     <input className="form__input  form__input_theme_dark" type="password" name="password"
-                        autoComplete="off" placeholder="Пароль" required minLength="5" maxLength="20"
+                        autoComplete="on" placeholder="Пароль" required minLength="5" maxLength="20"
                         value={form.password} onChange={handleChange} />
                     <span className={passwordSpanClassName}>{errors.password}</span>
                 </Form>
